@@ -15,41 +15,41 @@ public class WeatherModel : PageModel
 
     public async Task OnGetAsync()
     {
-        // var session = HttpContext.Session;
-        // var key = session.GetString(RegisterModel.SessionKey);
-        // UserId = key;
+        var session = HttpContext.Session;
+        var key = session.GetString(RegisterModel.SessionKey);
+        UserId = key;
 
-        // if (_context.User != null)
-        // {
-        //     // セッションと同じユーザーをDBから取得
-        //     var user = await _context.User.FindAsync(key);
+        if (_context.User != null)
+        {
+            // セッションと同じユーザーをDBから取得
+            var user = await _context.User.FindAsync(key);
 
-        //     // weather-apiをたたく
-        //     if (user != null)
-        //     {
-        //         using (var client = new HttpClient())
-        //         {
-        //             // ヘッダーにApiKeyを付与
-        //             client.DefaultRequestHeaders.Add("x-api-key", Environment.GetEnvironmentVariable("ApiKey"));
+            // weather-apiをたたく
+            if (user != null)
+            {
+                using (var client = new HttpClient())
+                {
+                    // ヘッダーにApiKeyを付与
+                    client.DefaultRequestHeaders.Add("x-api-key", Environment.GetEnvironmentVariable("ApiKey"));
 
-        //             var response = await client.GetAsync($"https://{your-functions-app}/api/weather/{user.City}");
+                    var response = await client.GetAsync($"https://tfapp-kosaito.azurewebsites.net/api/weather/{user.City}");
 
-        //             if (response.IsSuccessStatusCode)
-        //             {
-        //                 var responseBody = await response.Content.ReadAsStringAsync();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseBody = await response.Content.ReadAsStringAsync();
 
-        //                 Weather = JsonSerializer.Deserialize<Weather>(responseBody);
+                        Weather = JsonSerializer.Deserialize<Weather>(responseBody);
 
-        //                 System.IO.File.AppendAllText(@"./log.txt", $"{DateTime.Now:F}: weather-apiのコールに成功しました\n");
-        //             }
-        //         }
-        //     }
-        //     else
-        //     {
-        //         Weather = null;
+                        System.IO.File.AppendAllText(@"./log.txt", $"{DateTime.Now:F}: weather-apiのコールに成功しました\n");
+                    }
+                }
+            }
+            else
+            {
+                Weather = null;
 
-        //         System.IO.File.AppendAllText(@"./log.txt", $"{DateTime.Now:F}: ユーザーの登録処理が失敗しました\n");
-        //     }
-        // }
+                System.IO.File.AppendAllText(@"./log.txt", $"{DateTime.Now:F}: ユーザーの登録処理が失敗しました\n");
+            }
+        }
     }
 }

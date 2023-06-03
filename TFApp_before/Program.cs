@@ -3,10 +3,17 @@
 // Add services to the container.
 builder.Services.AddRazorPages();
 
+//builder.Services.AddDbContext<TFAppContext>(options =>
+//    options.UseInMemoryDatabase(builder.Configuration.GetConnectionString("TFAppContext")));
 builder.Services.AddDbContext<TFAppContext>(options =>
-    options.UseInMemoryDatabase(builder.Configuration.GetConnectionString("TFAppContext")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("TFAppContext")));
 
-builder.Services.AddDistributedMemoryCache();
+//builder.Services.AddDistributedMemoryCache();
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
+    options.InstanceName = builder.Environment.EnvironmentName.ToLower();
+});
 
 // セッションの設定
 builder.Services.AddSession(options =>
