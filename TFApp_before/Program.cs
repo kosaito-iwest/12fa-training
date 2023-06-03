@@ -23,6 +23,13 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddHttpClient("weather", httpClient =>
+{
+    httpClient.BaseAddress = new Uri("https://tfapp-kosaito.azurewebsites.net");
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

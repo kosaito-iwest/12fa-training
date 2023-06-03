@@ -3,10 +3,17 @@ namespace TFApp.Pages;
 public class WeatherModel : PageModel
 {
     private readonly TFAppContext _context;
-
-    public WeatherModel(TFAppContext context)
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IConfiguration _configuration;
+    public WeatherModel(
+        TFAppContext context,
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration
+        )
     {
         _context = context;
+        _httpClientFactory = httpClientFactory;
+        _configuration = configuration;
     }
 
     public string? UserId { get; private set; }
@@ -27,21 +34,17 @@ public class WeatherModel : PageModel
             // weather-apiをたたく
             if (user != null)
             {
-                using (var client = new HttpClient())
+                var client = _httpClientFactory.CreateClient("weather");
+                client.DefaultRequestHeaders.Add("x-api-key", _configuration.GetValue<string>("ApiKey"));
+
+                var response = await client.GetAsync($"api/weather/{user.City}");
+                if (response.IsSuccessStatusCode)
                 {
-                    // ヘッダーにApiKeyを付与
-                    client.DefaultRequestHeaders.Add("x-api-key", Environment.GetEnvironmentVariable("ApiKey"));
+                    var responseBody = await response.Content.ReadAsStringAsync();
 
-                    var response = await client.GetAsync($"https://tfapp-kosaito.azurewebsites.net/api/weather/{user.City}");
+                    Weather = JsonSerializer.Deserialize<Weather>(responseBody);
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var responseBody = await response.Content.ReadAsStringAsync();
-
-                        Weather = JsonSerializer.Deserialize<Weather>(responseBody);
-
-                        System.IO.File.AppendAllText(@"./log.txt", $"{DateTime.Now:F}: weather-apiのコールに成功しました\n");
-                    }
+                    System.IO.File.AppendAllText(@"./log.txt", $"{DateTime.Now:F}: weather-apiのコールに成功しました\n");
                 }
             }
             else
