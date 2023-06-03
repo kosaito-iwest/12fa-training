@@ -3,10 +3,15 @@
 public class RegisterModel : PageModel
 {
     private readonly TFAppContext _context;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public RegisterModel(TFAppContext context)
+    public RegisterModel(
+        TFAppContext context,
+        IHttpContextAccessor httpContextAccessor
+        )
     {
         _context = context;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     [BindProperty]
@@ -16,7 +21,8 @@ public class RegisterModel : PageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        var session = HttpContext.Session;
+        //var session = HttpContext.Session;
+        var session = _httpContextAccessor.HttpContext.Session;
         var key = session.GetString(SessionKey);
 
         if (_context.User != null)
@@ -51,7 +57,8 @@ public class RegisterModel : PageModel
             System.IO.File.AppendAllText(@"./log.txt", $"{DateTime.Now:F}: UserIdをDBに保存しました\n");
 
             // セッションに保存
-            HttpContext.Session.SetString(SessionKey, user.UserId);
+            //HttpContext.Session.SetString(SessionKey, user.UserId);
+            _httpContextAccessor.HttpContext.Session.SetString(SessionKey, user.UserId);
 
             System.IO.File.AppendAllText(@"./log.txt", $"{DateTime.Now:F}: UserIdをセッションに保存しました\n");
         }
