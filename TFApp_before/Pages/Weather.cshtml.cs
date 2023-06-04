@@ -2,21 +2,24 @@ namespace TFApp.Pages;
 
 public class WeatherModel : PageModel
 {
+    private readonly ILogger<RegisterModel> _logger;
     private readonly TFAppContext _context;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
     private readonly IHttpContextAccessor _httpContextAccessor;
     public WeatherModel(
         TFAppContext context,
-        IHttpClientFactory httpClientFactory,
+        IHttpContextAccessor httpContextAccessor,
         IConfiguration configuration,
-        IHttpContextAccessor httpContextAccessor
+        ILogger<RegisterModel> logger,
+        IHttpClientFactory httpClientFactory
         )
     {
         _context = context;
-        _httpClientFactory = httpClientFactory;
-        _configuration = configuration;
         _httpContextAccessor = httpContextAccessor;
+        _configuration = configuration;
+        _logger = logger;
+        _httpClientFactory = httpClientFactory;
     }
 
     public string? UserId { get; private set; }
@@ -38,6 +41,7 @@ public class WeatherModel : PageModel
             // weather-apiをたたく
             if (user != null)
             {
+                // ヘッダーにApiKeyを付与
                 var client = _httpClientFactory.CreateClient("weather");
                 client.DefaultRequestHeaders.Add("x-api-key", _configuration.GetValue<string>("ApiKey"));
                 var response = await client.GetAsync($"api/weather/{user.City}");
@@ -48,14 +52,14 @@ public class WeatherModel : PageModel
 
                     Weather = JsonSerializer.Deserialize<Weather>(responseBody);
 
-                    System.IO.File.AppendAllText(@"./log.txt", $"{DateTime.Now:F}: weather-apiのコールに成功しました\n");
+                    _logger.LogInformation($"{DateTime.Now:F}: weather-apiのコールに成功しました\n");
                 }
             }
             else
             {
                 Weather = null;
 
-                System.IO.File.AppendAllText(@"./log.txt", $"{DateTime.Now:F}: ユーザーの登録処理が失敗しました\n");
+                _logger.LogError($"{DateTime.Now:F}: ユーザーの登録処理が失敗しました\n");
             }
         }
     }
