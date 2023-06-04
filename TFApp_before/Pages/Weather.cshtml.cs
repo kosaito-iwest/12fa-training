@@ -5,15 +5,18 @@ public class WeatherModel : PageModel
     private readonly TFAppContext _context;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     public WeatherModel(
         TFAppContext context,
         IHttpClientFactory httpClientFactory,
-        IConfiguration configuration
+        IConfiguration configuration,
+        IHttpContextAccessor httpContextAccessor
         )
     {
         _context = context;
         _httpClientFactory = httpClientFactory;
         _configuration = configuration;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public string? UserId { get; private set; }
@@ -22,7 +25,8 @@ public class WeatherModel : PageModel
 
     public async Task OnGetAsync()
     {
-        var session = HttpContext.Session;
+        // セッションからUserIdを取り出す
+        var session = _httpContextAccessor.HttpContext.Session;
         var key = session.GetString(RegisterModel.SessionKey);
         UserId = key;
 
@@ -36,8 +40,8 @@ public class WeatherModel : PageModel
             {
                 var client = _httpClientFactory.CreateClient("weather");
                 client.DefaultRequestHeaders.Add("x-api-key", _configuration.GetValue<string>("ApiKey"));
-
                 var response = await client.GetAsync($"api/weather/{user.City}");
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseBody = await response.Content.ReadAsStringAsync();
