@@ -34,7 +34,7 @@ namespace TFApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("message3")
+                    b.Property<string>("message")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

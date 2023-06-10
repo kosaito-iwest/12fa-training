@@ -11,8 +11,8 @@ using TFApp.Data;
 namespace TFApp.Migrations
 {
     [DbContext(typeof(TFAppContext))]
-    [Migration("20230610075059_AddUserMessage3")]
-    partial class AddUserMessage3
+    [Migration("20230610084227_AddUserMessage")]
+    partial class AddUserMessage
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -36,7 +36,7 @@ namespace TFApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("message3")
+                    b.Property<string>("message")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
